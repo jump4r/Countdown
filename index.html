@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Required Meta Tags for bootstrap -->
+        <!-- Use the template element instead creating the objects in javascript -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script type="text/javascript" src='countdown.js'></script>
+        <template id='countdown-row'>
+            <tr scope='row'>
+                <td class='countdown-id'>Countdown #1</td>
+                <td class='countdown-time-remaining'>Time Remaining</td>
+            </tr>
+        </template>
+        <title>Countdown</title>
+    </head>
+    <body>
+        <div id='create-countdown-modal' class='modal'>
+            <div class='modal-content'>
+                <div class='modal-title'>Create Countdown</div>
+                <button id='close-modal' class='btn btn-outline-dark'>
+                    <span class='modal-close'>&times;</span>
+                </button>
+            </div>
+        </div>
+        <h1 class='title'>Countdown</h1>
+        <div class='table-wrapper'>
+            <table class='table'>
+                <thead>
+                    <tr scope='row'>
+                        <th colspan='2'>Your Countdowns</th>    
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr scope='row'>
+                        <td>Countdown #1</td>
+                        <td>Time Remaining</td>
+                    </tr>
+                    <tr scope='row'>    
+                        <td class='new-button' colspan='2'>
+                            <button id='open-modal' class='btn btn-outline-dark'>
+                                New Countdown
+                                <span class="glyphicon glyphicon-asterisk"></span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
