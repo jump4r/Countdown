@@ -1,8 +1,6 @@
 var modal;
 var countdowns = [];
 var saveData = (window.localStorage.getItem("SaveData") === null) ? "{}" : window.localStorage.getItem("SaveData");
-var JSONSaveData;
-var HTMLCountdownRows;
 var boolUpdateCountdowns = false;
 
 document.addEventListener('DOMContentLoaded', _ => {
@@ -14,37 +12,24 @@ document.addEventListener('DOMContentLoaded', _ => {
     // Load the Save Data on load
     LoadData(saveData);
 
-    // Need to call this after we load the data.
-    HTMLCountdownRows = GetCountdownRows();
+    setInterval(UpdateCountdowns, 1000);
 });
-
-function GetCountdownRows() {
-    return document.querySelectorAll('.countdown-row');
-}
 
 // Update
 function UpdateCountdowns() {
-    console.log('Update Countdowns');
+    let HTMLCountdownRows = document.querySelectorAll('.countdown-row');
     for (let i = 0; i < countdowns.length; i++) {
         countdowns[i].timeRemainingInt--;
-        if (countdowns[i].timeRemainingInt < 0) {
-
-        }
-        let updateTimeRemainingString = CompileCountdownTime(countdowns[i].timeRemainingInt);
-        HTMLCountdownRows[i].querySelector('.countdown-time-remaining').textContent = updateTimeRemainingString; 
-        countdowns[i].timeRemainingString = updateTimeRemainingString;
+        HTMLCountdownRows[i].querySelector('.countdown-time-remaining').textContent = CompileCountdownTime(countdowns[i].timeRemainingInt); 
+        countdowns[i].timeRemainingString = CompileCountdownTime(countdowns[i].timeRemainingInt);
     }
 }
 
 // Get Input from Player, then add a countdown.
 function CreateNewCountdown() {
-    // Get Input Text
     let label = document.getElementById('user-label').value;
     let endDate = document.getElementById('user-time').value;
-
-    difference = GetTimeDifference(endDate);
-
-    AddCountdown(label, endDate, difference, true)
+    AddCountdown(label, endDate, GetTimeDifference(endDate), true)
 }
 
 // Add a countdown to the list
@@ -57,23 +42,18 @@ function AddCountdown(label, endDate, timeRemainingInt, isNewCountdown) {
     let newCountdown = {
         name: label,
         finishDate: endDate,
-        timeRemainingString: "",
+        timeRemainingString: CompileCountdownTime(timeRemainingInt),
         timeRemainingInt: timeRemainingInt
     };
-
-    let timeRemainingString = CompileCountdownTime(timeRemainingInt);
-    newCountdown.timeRemainingString = timeRemainingString;
 
     let t = document.querySelector('#countdown-template');
     let clone = document.importNode(t.content, true);   
 
     // Add values to HTML
     td = clone.querySelectorAll("td");
-    td[0].textContent = label.toString();
-    td[1].textContent = timeRemainingString;
-    td[2].textContent = endDate.toString();
-
-    var tb = document.querySelector("tbody");
+    td[0].textContent = newCountdown.name;
+    td[1].textContent = newCountdown.timeRemainingString;
+    td[2].textContent = newCountdown.finishDate;
 
     // Add new countdown to countdowns list
     countdowns.push(newCountdown);
@@ -83,27 +63,14 @@ function AddCountdown(label, endDate, timeRemainingInt, isNewCountdown) {
     clone.querySelector('.btn-countdown-remove').addEventListener('click', function(event) { 
         countdownRow.remove();
         UpdateSaveData();
-        HTMLCountdownRows = GetCountdownRows();
     });
 
     // Insert the row before the last row
+    let tb = document.querySelector("tbody");    
     tr = tb.querySelectorAll("tr");
     tb.insertBefore(clone, tr[tr.length-1]);
     
-    // If we are creating a new countdown, we need to update save data and save file
-    if (isNewCountdown) {
-        UpdateSaveData();
-    }
-
-    // Update the Countdown Rows
-    HTMLCountdownRows = GetCountdownRows();
-
-    // If we weren't updating the countdowns already, do that
-    if (boolUpdateCountdowns == false) {
-        boolUpdateCountdowns = true;
-        setInterval(UpdateCountdowns, 1000);
-    }
-
+    UpdateSaveData();
     CloseCreateCountdown();
 }
 
@@ -122,7 +89,6 @@ function CompileCountdownTime(time) {
 
 // Gets the difference between the end date and the current time.
 function GetTimeDifference(endDate) {
-    // Calculate the end Time and Compile as string
     let endTimeAsInt = Date.parse(endDate.toString()) / 1000;
     let currentTime = (new Date()).getTime() / 1000 | 0;
     return (endTimeAsInt - currentTime);
@@ -159,13 +125,7 @@ function LoadData(savedData) {
     let savedDataArray = JSON.parse(savedData);
     console.log(savedDataArray);
     for (let i = 0; i < savedDataArray.length; i++) {
-        // Saved data is in two parts, add to the list
-        if (savedDataArray[i] === "") { 
-            continue; 
-        }
-        console.log(savedDataArray[i].name, savedDataArray[i].finishDate);
-        let difference = GetTimeDifference(savedDataArray[i].finishDate);
-        AddCountdown(savedDataArray[i].name, savedDataArray[i].finishDate, difference, false);
+        AddCountdown(savedDataArray[i].name, savedDataArray[i].finishDate, GetTimeDifference(savedDataArray[i].finishDate), false);
     }
 }
 
