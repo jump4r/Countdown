@@ -1,5 +1,6 @@
 var modal;
 var countdowns = [];
+var saveData = (window.localStorage.getItem("SaveData") === null) ? "" : window.localStorage.getItem("SaveData");
 var HTMLCountdownRows;
 var boolUpdateCountdowns = false;
 
@@ -7,9 +8,25 @@ document.addEventListener('DOMContentLoaded', _ => {
     modal = document.querySelector('#create-countdown-modal');
     document.querySelector('#modal-open').addEventListener('click', OpenCreateCountdown);
     document.querySelector('#modal-close').addEventListener('click', CloseCreateCountdown);
-    document.querySelector('#modal-submit-button').addEventListener('click', AddCountdown);
+    document.querySelector('#modal-submit-button').addEventListener('click', CreateNewCountdown);
     HTMLCountdownRows = document.querySelectorAll('tr');
+
+    // Load the Save Data on load
+    LoadData(saveData);
 });
+
+// Load Data
+function LoadData(savedData) {
+    let savedDataArray = savedData.split('|');
+    for (let i = 0; i < savedDataArray.length - 1; i++) {
+        // Saved data is in two parts, add to the list
+        if (savedDataArray[i] === "") { 
+            continue; 
+        }
+        let savedCountdown = savedDataArray[i].split(',');
+        AddCountdown(savedCountdown[0], savedCountdown[1], savedCountdown[2], false);
+    }
+}
 
 // Update
 function UpdateCountdowns() {
@@ -20,36 +37,40 @@ function UpdateCountdowns() {
         countdowns[i].timeRemainingString = updateTimeRemainingString;
     }
 }
-// Countdown
-function AddCountdown() {
+// Get Input from Player, then add a countdown.
+function CreateNewCountdown() {
     // Get Input Text
-    var label = document.getElementById('user-label').value;
-    var endDate = document.getElementById('user-time').value;
-
-    let newCountdown = {
-        name: label,
-        finishDate: endDate,
-        timeRemainingString: "",
-        timeRemainingInt: 0
-    };
-
-    var t = document.querySelector('#countdown-row');
-
-    var clone = document.importNode(t.content, true);   
+    let label = document.getElementById('user-label').value;
+    let endDate = document.getElementById('user-time').value;
 
     // Calculate the end Time and Compile as string
     let endTimeAsInt = Date.parse(endDate.toString()) / 1000;
     let currentTime = (new Date()).getTime() / 1000 | 0;
     let difference = endTimeAsInt - currentTime;
 
-    let timeRemaining = CompileCountdownTime(difference);
-    newCountdown.timeRemainingString = timeRemaining;
-    newCountdown.timeRemainingInt = difference;
+    AddCountdown(label, endDate, difference, true)
+}
+// Countdown
+function AddCountdown(label, endDate, timeRemainingInt, isNewCountdown) {
+    
+    let newCountdown = {
+        name: label,
+        finishDate: endDate,
+        timeRemainingString: "",
+        timeRemainingInt: timeRemainingInt
+    };
+
+    let timeRemainingString = CompileCountdownTime(timeRemainingInt);
+    newCountdown.timeRemainingString = timeRemainingString;
+
+    let t = document.querySelector('#countdown-row');
+
+    let clone = document.importNode(t.content, true);   
 
     // Add values to HTML
     td = clone.querySelectorAll("td");
     td[0].textContent = label.toString();
-    td[1].textContent = timeRemaining;
+    td[1].textContent = timeRemainingString;
     td[2].textContent = endDate.toString();
 
     var tb = document.querySelector("tbody");
@@ -61,6 +82,13 @@ function AddCountdown() {
 
     // Add new countdown to countdowns list
     countdowns.push(newCountdown);
+    
+    // If we are creating a new countdown, we need to update save sile
+    if (isNewCountdown) {
+        console.log("Save File Updated");
+        saveData += UpdateSaveString(newCountdown);
+        UpdateSaveData(saveData);
+    }
 
     // Update the Countdown Rows
     HTMLCountdownRows = document.querySelectorAll('tr');
@@ -93,6 +121,14 @@ function OpenCreateCountdown() {
 
 function CloseCreateCountdown() {
     modal.style.display = 'none';
+}
+
+function UpdateSaveString(newCountdown) {
+    return newCountdown.name + ',' + newCountdown.finishDate + ',' + newCountdown.timeRemainingInt + '|'; 
+}
+
+function UpdateSaveData(newCountdownSaveString) {
+    window.localStorage.setItem("SaveData", saveData);
 }
 
 // When the user clicks anywhere outside of the modal, close it
