@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', _ => {
 });
 
 // Load Data
+// Data is saved as follows: Label, Time When Finished (Date), Time Remaining (int).
 function LoadData(savedData) {
     let savedDataArray = savedData.split('|');
     for (let i = 0; i < savedDataArray.length - 1; i++) {
@@ -23,9 +24,22 @@ function LoadData(savedData) {
         if (savedDataArray[i] === "") { 
             continue; 
         }
+
+        // Get the current time
         let savedCountdown = savedDataArray[i].split(',');
-        AddCountdown(savedCountdown[0], savedCountdown[1], savedCountdown[2], false);
+        let difference = GetTimeDifference(savedCountdown[1]);
+        AddCountdown(savedCountdown[0], savedCountdown[1], difference, false);
     }
+}
+
+// Gets the difference between the end date and the current time.
+function GetTimeDifference(endDate) {
+    // Calculate the end Time and Compile as string
+    let endTimeAsInt = Date.parse(endDate.toString()) / 1000;
+    let currentTime = (new Date()).getTime() / 1000 | 0;
+    console.log(endTimeAsInt, currentTime);
+    let difference = endTimeAsInt - currentTime;
+    return difference;
 }
 
 // Update
@@ -37,16 +51,14 @@ function UpdateCountdowns() {
         countdowns[i].timeRemainingString = updateTimeRemainingString;
     }
 }
+
 // Get Input from Player, then add a countdown.
 function CreateNewCountdown() {
     // Get Input Text
     let label = document.getElementById('user-label').value;
     let endDate = document.getElementById('user-time').value;
 
-    // Calculate the end Time and Compile as string
-    let endTimeAsInt = Date.parse(endDate.toString()) / 1000;
-    let currentTime = (new Date()).getTime() / 1000 | 0;
-    let difference = endTimeAsInt - currentTime;
+    difference = GetTimeDifference(endDate);
 
     AddCountdown(label, endDate, difference, true)
 }
