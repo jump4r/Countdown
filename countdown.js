@@ -1,6 +1,7 @@
 var modal;
 var countdowns = [];
-var saveData = (window.localStorage.getItem("SaveData") === null) ? "" : window.localStorage.getItem("SaveData");
+var saveData = (window.localStorage.getItem("SaveData") === null) ? "{}" : window.localStorage.getItem("SaveData");
+var JSONSaveData;
 var HTMLCountdownRows;
 var boolUpdateCountdowns = false;
 
@@ -23,8 +24,12 @@ function GetCountdownRows() {
 
 // Update
 function UpdateCountdowns() {
+    console.log('Update Countdowns');
     for (let i = 0; i < countdowns.length; i++) {
         countdowns[i].timeRemainingInt--;
+        if (countdowns[i].timeRemainingInt < 0) {
+
+        }
         let updateTimeRemainingString = CompileCountdownTime(countdowns[i].timeRemainingInt);
         HTMLCountdownRows[i].querySelector('.countdown-time-remaining').textContent = updateTimeRemainingString; 
         countdowns[i].timeRemainingString = updateTimeRemainingString;
@@ -70,17 +75,24 @@ function AddCountdown(label, endDate, timeRemainingInt, isNewCountdown) {
 
     var tb = document.querySelector("tbody");
 
+    // Add new countdown to countdowns list
+    countdowns.push(newCountdown);
+
+    // Set Event Listener for Remove Button
+    let countdownRow = clone.querySelector('tr');
+    clone.querySelector('.btn-countdown-remove').addEventListener('click', function(event) { 
+        countdownRow.remove();
+        UpdateSaveData();
+        HTMLCountdownRows = GetCountdownRows();
+    });
+
     // Insert the row before the last row
     tr = tb.querySelectorAll("tr");
     tb.insertBefore(clone, tr[tr.length-1]);
-
-    // Add new countdown to countdowns list
-    countdowns.push(newCountdown);
     
     // If we are creating a new countdown, we need to update save data and save file
     if (isNewCountdown) {
-        saveData += UpdateSaveString(newCountdown);
-        UpdateSaveData(saveData);
+        UpdateSaveData();
     }
 
     // Update the Countdown Rows
@@ -126,30 +138,34 @@ function CloseCreateCountdown() {
     modal.style.display = 'none';
 }
 
-// Update the save string to be stored in localStorage
-function UpdateSaveString(newCountdown) {
-    return newCountdown.name + ',' + newCountdown.finishDate + ',' + newCountdown.timeRemainingInt + '|'; 
-}
-
 // Save Data
-function UpdateSaveData(newCountdownSaveString) {
-    window.localStorage.setItem("SaveData", saveData);
+function UpdateSaveData() {
+    countdowns = [];
+    document.querySelectorAll('.countdown-row').forEach(el => {
+        countdowns.push({
+            name: el.querySelector('.countdown-id').textContent,
+            finishDate: el.querySelector('.countdown-end-time').textContent,
+            timeRemainingString: el.querySelector('.countdown-time-remaining').textContent,
+            timeRemainingInt: GetTimeDifference(el.querySelector('.countdown-end-time').textContent)
+        });
+    });
+
+    window.localStorage.setItem("SaveData", JSON.stringify(countdowns));
 }
 
 // Load Data
 // Data is saved as follows: Label, Time When Finished (Date), Time Remaining (int).
 function LoadData(savedData) {
-    let savedDataArray = savedData.split('|');
-    for (let i = 0; i < savedDataArray.length - 1; i++) {
+    let savedDataArray = JSON.parse(savedData);
+    console.log(savedDataArray);
+    for (let i = 0; i < savedDataArray.length; i++) {
         // Saved data is in two parts, add to the list
         if (savedDataArray[i] === "") { 
             continue; 
         }
-
-        // Get the current time　difference
-        let savedCountdown = savedDataArray[i].split(',');
-        let difference = GetTimeDifference(savedCountdown[1]);
-        AddCountdown(savedCountdown[0], savedCountdown[1], difference, false);
+        console.log(savedDataArray[i].name, savedDataArray[i].finishDate);
+        let difference = GetTimeDifference(savedDataArray[i].finishDate);
+        AddCountdown(savedDataArray[i].name, savedDataArray[i].finishDate, difference, false);
     }
 }
 

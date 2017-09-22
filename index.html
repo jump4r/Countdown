@@ -15,6 +15,9 @@
                 <td class='countdown-id'>Countdown Label</td>
                 <td class='countdown-time-remaining'>Time Remaining</td>
                 <td class='countdown-end-time'>End Time</td>
+                <td>
+                    <button class='btn btn-outline-dark btn-countdown-remove'>&times;</button>
+                </td>
             </tr>
         </template>
         <title>Countdown</title>
@@ -46,7 +49,7 @@
             <table class='table'>
                 <thead>
                     <tr scope='row'>
-                        <th colspan='3'>Your Countdowns</th>    
+                        <th colspan='4'>Your Countdowns</th>    
                     </tr>
                 </thead>
                 <tbody>
@@ -54,9 +57,10 @@
                         <td>Countdown Label</td>
                         <td>Time Remaining</td>
                         <td>End Time</td>
+                        <td class='text-center'>Remove</td>
                     </tr>
                     <tr scope='row'>    
-                        <td class='new-button' colspan='3'>
+                        <td class='new-button' colspan='4'>
                             <button id='modal-open' class='btn btn-outline-dark'>
                                 New Countdown
                                 <span class="glyphicon glyphicon-asterisk"></span>

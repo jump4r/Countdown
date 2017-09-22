@@ -2,6 +2,10 @@ html, body {
     background-color: #222;
 }
 
+.tetx-center {
+    text-align: center;
+}
+
 .title {
     color: white;
     font-family: 'Roboto', 'Sans-serif';
@@ -27,6 +31,11 @@ th {
 
 .input-row {
     padding: 10px;
+}
+
+.btn-countdown-remove {
+    margin: 0 auto;
+    display: block;
 }
 
 .modal {
